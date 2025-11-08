@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation - Sistema Fallback SQL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Documentation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       window.FontAwesomeConfig = {
@@ -15,44 +15,85 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-      ::-webkit-scrollbar { width: 8px; }
-      ::-webkit-scrollbar-track { background: #f1f5f9; }
-      ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-      body { font-family: 'Inter', sans-serif; }
+      ::-webkit-scrollbar { display: none; }
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+      html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+      }
+      body { 
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+      }
       .font-mono { font-family: 'JetBrains Mono', monospace; }
       .code-inline {
         font-family: 'JetBrains Mono', monospace;
         background: #f1f5f9;
         padding: 2px 6px;
         border-radius: 4px;
-        font-size: 0.9em;
+        font-size: 0.85em;
         color: #334155;
+        word-break: break-word;
       }
-      @media (max-width: 768px) {
+      
+      /* Prevent layout shift */
+      #sidebar {
+        will-change: transform;
+      }
+      
+      /* Better touch targets */
+      button, a {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* Smooth transitions */
+      #sidebar, #mobile-overlay {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      /* Prevent body scroll when menu is open */
+      body.menu-open {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+      }
+      
+      /* Responsive images */
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      
+      /* Better readability on small screens */
+      @media (max-width: 640px) {
         .code-inline {
-          font-size: 0.8em;
-          padding: 1px 4px;
+          font-size: 0.75em;
         }
       }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Mobile Menu Button -->
-    <button id="mobile-menu-btn" class="lg:hidden fixed top-4 left-4 z-[60] w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-700 transition">
+    <button id="mobile-menu-btn" class="lg:hidden fixed top-4 left-4 z-[60] w-12 h-12 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg hover:bg-blue-700 active:scale-95 transition-all">
         <i class="fa-solid fa-bars text-lg"></i>
     </button>
 
     <!-- Header - Responsive -->
-    <header id="header" class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 shadow-sm">
+    <header id="header" class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
       <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 lg:py-4">
-        <div class="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 ml-12 lg:ml-0">
-          <div class="flex items-center space-x-2 sm:space-x-3">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+        <div class="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 ml-14 sm:ml-16 lg:ml-0">
+          <div class="flex items-center space-x-2 lg:space-x-3">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center flex-shrink-0">
               <i class="fa-solid fa-database text-white text-sm sm:text-base lg:text-lg"></i>
             </div>
-            <div>
-              <h1 class="text-xs sm:text-sm lg:text-lg font-semibold text-gray-900 leading-tight">Sistema de Envio com Fallback SQL</h1>
+            <div class="min-w-0">
+              <h1 class="text-xs sm:text-sm lg:text-lg font-semibold text-gray-900 truncate">Sistema de Envio com Fallback SQL</h1>
               <p class="text-[10px] sm:text-xs text-gray-500 hidden sm:block">v2.1.0 - Documentação Técnica</p>
             </div>
           </div>
@@ -61,40 +102,36 @@
     </header>
 
     <!-- Sidebar - Responsive with Mobile Overlay -->
-    <aside id="sidebar" class="fixed left-0 top-[57px] lg:top-[73px] bottom-0 w-64 sm:w-72 bg-white border-r border-gray-200 overflow-y-auto transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 shadow-lg lg:shadow-none">
-      <div class="p-3 sm:p-4 lg:p-6">
+    <aside id="sidebar" class="fixed left-0 top-[57px] sm:top-[61px] lg:top-[73px] bottom-0 w-72 sm:w-80 bg-white border-r border-gray-200 overflow-y-auto transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 shadow-2xl lg:shadow-none">
+      <div class="p-4 sm:p-5 lg:p-6">
         <div class="relative mb-4 lg:mb-6">
-          <input type="text" id="search-input" placeholder="Buscar..." class="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-          <i class="fa-solid fa-search absolute left-3 top-2.5 sm:top-3 text-gray-400 text-xs sm:text-sm"></i>
+          <input type="text" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400 text-sm pointer-events-none"></i>
         </div>
         <nav class="space-y-1">
-          <a href="#visao-geral" class="mobile-nav-link flex items-center px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-            <i class="fa-solid fa-eye w-4 sm:w-5 text-gray-400"></i>
-            <span class="ml-2 sm:ml-3">Visão Geral</span>
+          <a href="#visao-geral" class="mobile-nav-link flex items-center px-3 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors">
+            <i class="fa-solid fa-eye w-5 text-gray-400"></i>
+            <span class="ml-3">Visão Geral</span>
           </a>
-          <a href="#status-implementacao" class="mobile-nav-link flex items-center px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-            <i class="fa-solid fa-clipboard-check w-4 sm:w-5 text-gray-400"></i>
-            <span class="ml-2 sm:ml-3">Status Implementação</span>
+          <a href="#arquitetura" class="mobile-nav-link flex items-center px-3 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors">
+            <i class="fa-solid fa-sitemap w-5 text-gray-400"></i>
+            <span class="ml-3">Arquitetura</span>
           </a>
-          <a href="#arquitetura" class="mobile-nav-link flex items-center px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-            <i class="fa-solid fa-sitemap w-4 sm:w-5 text-gray-400"></i>
-            <span class="ml-2 sm:ml-3">Arquitetura</span>
+          <a href="#estados" class="mobile-nav-link flex items-center px-3 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors">
+            <i class="fa-solid fa-toggle-on w-5 text-gray-400"></i>
+            <span class="ml-3">Estados</span>
           </a>
-          <a href="#estados" class="mobile-nav-link flex items-center px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-            <i class="fa-solid fa-toggle-on w-4 sm:w-5 text-gray-400"></i>
-            <span class="ml-2 sm:ml-3">Estados</span>
+          <a href="#fluxos" class="mobile-nav-link flex items-center px-3 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors">
+            <i class="fa-solid fa-diagram-project w-5 text-gray-400"></i>
+            <span class="ml-3">Fluxos</span>
           </a>
-          <a href="#fluxos" class="mobile-nav-link flex items-center px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-            <i class="fa-solid fa-diagram-project w-4 sm:w-5 text-gray-400"></i>
-            <span class="ml-2 sm:ml-3">Fluxos</span>
+          <a href="#componentes" class="mobile-nav-link flex items-center px-3 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors">
+            <i class="fa-solid fa-cubes w-5 text-gray-400"></i>
+            <span class="ml-3">Componentes</span>
           </a>
-          <a href="#componentes" class="mobile-nav-link flex items-center px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-            <i class="fa-solid fa-cubes w-4 sm:w-5 text-gray-400"></i>
-            <span class="ml-2 sm:ml-3">Componentes</span>
-          </a>
-          <a href="#configuracao" class="mobile-nav-link flex items-center px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-            <i class="fa-solid fa-sliders w-4 sm:w-5 text-gray-400"></i>
-            <span class="ml-2 sm:ml-3">Configuração</span>
+          <a href="#configuracao" class="mobile-nav-link flex items-center px-3 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors">
+            <i class="fa-solid fa-sliders w-5 text-gray-400"></i>
+            <span class="ml-3">Configuração</span>
           </a>
         </nav>
       </div>
@@ -104,429 +141,175 @@
     <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
 
     <!-- Main Content - Responsive -->
-    <main id="main-content" class="lg:ml-72 mt-[57px] lg:mt-[73px] p-3 sm:p-4 md:p-6 lg:p-8">
+    <main id="main-content" class="lg:ml-72 mt-[57px] sm:mt-[61px] lg:mt-[73px] p-3 sm:p-4 md:p-6 lg:p-8">
       <div class="max-w-5xl mx-auto">
         <!-- Hero Section - Responsive -->
         <section id="hero-section" class="mb-6 sm:mb-8 lg:mb-12">
-          <div class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-lg sm:rounded-xl lg:rounded-2xl p-4 sm:p-6 md:p-8 lg:p-12 text-white relative overflow-hidden">
+          <div class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-xl lg:rounded-2xl p-5 sm:p-6 md:p-8 lg:p-12 text-white relative overflow-hidden">
             <div class="relative z-10">
-              <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 lg:mb-4">
-                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 lg:px-3 bg-blue-500 bg-opacity-30 rounded-full text-[10px] sm:text-xs font-semibold uppercase">Technical Docs</span>
-                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 lg:px-3 bg-green-500 bg-opacity-30 rounded-full text-[10px] sm:text-xs font-semibold flex items-center space-x-1">
+              <div class="flex flex-wrap items-center gap-2 mb-3 lg:mb-4">
+                <span class="px-2 sm:px-2.5 lg:px-3 py-1 bg-blue-500 bg-opacity-30 rounded-full text-[10px] sm:text-xs font-semibold uppercase">Technical Docs</span>
+                <span class="px-2 sm:px-2.5 lg:px-3 py-1 bg-green-500 bg-opacity-30 rounded-full text-[10px] sm:text-xs font-semibold flex items-center space-x-1">
                   <i class="fa-solid fa-circle text-green-300 text-[8px] sm:text-xs"></i>
                   <span>Production</span>
                 </span>
               </div>
-              <h1 class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 lg:mb-4 leading-tight">Sistema de Envio com Fallback SQL</h1>
-              <p class="text-sm sm:text-base md:text-lg lg:text-xl text-blue-100 leading-relaxed">Arquitetura resiliente e escalável para integração ClickHouse + SQL Server</p>
+              <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 lg:mb-4 leading-tight">Sistema de Envio com Fallback SQL</h1>
+              <p class="text-sm sm:text-base lg:text-xl text-blue-100 leading-relaxed">Arquitetura resiliente e escalável para integração ClickHouse + SQL Server</p>
             </div>
           </div>
         </section>
 
         <!-- Visão Geral -->
-        <section id="visao-geral" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-24">
-          <div class="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 shadow-sm">
-            <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-6">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+        <section id="visao-geral" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-20 sm:scroll-mt-24">
+          <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div class="flex items-center space-x-3 mb-4 sm:mb-5 lg:mb-6">
+              <div class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-eye text-blue-600 text-base sm:text-lg lg:text-xl"></i>
               </div>
-              <div>
-                <h2 class="text-base sm:text-xl lg:text-2xl font-bold text-gray-900">Visão Geral</h2>
-                <p class="text-[10px] sm:text-xs lg:text-sm text-gray-500">Introdução ao sistema</p>
+              <div class="min-w-0">
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Visão Geral</h2>
+                <p class="text-xs sm:text-sm text-gray-500">Introdução ao sistema</p>
               </div>
             </div>
             <div class="prose max-w-none">
-              <p class="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4 lg:mb-6">
+              <p class="text-sm sm:text-base text-gray-700 leading-relaxed mb-4 sm:mb-5 lg:mb-6">
                 Sistema de envio de dados com estratégia de fallback inteligente entre <span class="code-inline">ClickHouse</span> e <span class="code-inline">SQL Server</span>.
               </p>
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4 lg:mb-6">
-                <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4 lg:p-5">
-                  <i class="fa-solid fa-shield-halved text-green-600 text-lg sm:text-xl lg:text-2xl mb-1 sm:mb-2"></i>
-                  <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-xs sm:text-sm lg:text-base">Alta Disponibilidade</h3>
-                  <p class="text-[10px] sm:text-xs lg:text-sm text-gray-600">Sistema operacional mesmo com falhas</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4 lg:mb-6">
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 sm:p-5">
+                  <i class="fa-solid fa-shield-halved text-green-600 text-xl sm:text-2xl mb-2"></i>
+                  <h3 class="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Alta Disponibilidade</h3>
+                  <p class="text-xs sm:text-sm text-gray-600">Sistema operacional mesmo com falhas</p>
                 </div>
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 sm:p-4 lg:p-5">
-                  <i class="fa-solid fa-database text-blue-600 text-lg sm:text-xl lg:text-2xl mb-1 sm:mb-2"></i>
-                  <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-xs sm:text-sm lg:text-base">Zero Perda</h3>
-                  <p class="text-[10px] sm:text-xs lg:text-sm text-gray-600">Dados permanentes no SQL Server</p>
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 sm:p-5">
+                  <i class="fa-solid fa-database text-blue-600 text-xl sm:text-2xl mb-2"></i>
+                  <h3 class="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Zero Perda</h3>
+                  <p class="text-xs sm:text-sm text-gray-600">Dados permanentes no SQL Server</p>
                 </div>
-                <div class="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-3 sm:p-4 lg:p-5">
-                  <i class="fa-solid fa-rotate text-purple-600 text-lg sm:text-xl lg:text-2xl mb-1 sm:mb-2"></i>
-                  <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-xs sm:text-sm lg:text-base">Auto Recovery</h3>
-                  <p class="text-[10px] sm:text-xs lg:text-sm text-gray-600">Recuperação automática</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- STATUS DE IMPLEMENTAÇÃO - NOVA SEÇÃO -->
-        <section id="status-implementacao" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-24">
-          <div class="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 shadow-sm">
-            <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-6">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-clipboard-check text-indigo-600 text-base sm:text-lg lg:text-xl"></i>
-              </div>
-              <div>
-                <h2 class="text-base sm:text-xl lg:text-2xl font-bold text-gray-900">Status da Implementação</h2>
-                <p class="text-[10px] sm:text-xs lg:text-sm text-gray-500">Progresso atual do desenvolvimento</p>
-              </div>
-            </div>
-
-            <!-- Barra de Progresso -->
-            <div class="mb-4 sm:mb-6 lg:mb-8">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs sm:text-sm font-semibold text-gray-700">Progresso Geral</span>
-                <span class="text-xs sm:text-sm font-bold text-indigo-600">75%</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2 sm:h-3">
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 sm:h-3 rounded-full transition-all duration-500" style="width: 75%"></div>
-              </div>
-            </div>
-
-            <!-- Grid de Status -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-              
-              <!-- IMPLEMENTADO -->
-              <div class="border-2 border-green-300 rounded-lg sm:rounded-xl overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50">
-                <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-3 sm:px-4 py-2 sm:py-2.5">
-                  <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-check-circle text-white text-base sm:text-lg"></i>
-                    <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white">✅ IMPLEMENTADO</h3>
-                  </div>
-                </div>
-                <div class="p-3 sm:p-4 lg:p-5">
-                  <div class="space-y-2 sm:space-y-3">
-                    
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-server text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">WCF Service</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Recebimento de requisições</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-toggle-on text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Verificação ATIVADO</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Controle de habilitação do ClickHouse</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-paper-plane text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Envio para ClickHouse</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Quando ATIVADO = true</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span class="text-white font-bold text-[10px] sm:text-xs">0</span>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Status 0 - ENVIADO</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">HTTP 202 recebido com sucesso</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span class="text-white font-bold text-[10px] sm:text-xs">1</span>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Status 1 - ERRO</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Falha detectada e registrada</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span class="text-white font-bold text-[10px] sm:text-xs">99</span>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Status 99 - DESATIVADO</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Quando ATIVADO = false</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-database text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Persistência SQL Server</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Todos os dados gravados com ClickStatus</p>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-
-              <!-- PENDENTE -->
-              <div class="border-2 border-orange-300 rounded-lg sm:rounded-xl overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50">
-                <div class="bg-gradient-to-r from-orange-600 to-amber-600 px-3 sm:px-4 py-2 sm:py-2.5">
-                  <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-clock text-white text-base sm:text-lg"></i>
-                    <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white">⏳ PENDENTE</h3>
-                  </div>
-                </div>
-                <div class="p-3 sm:p-4 lg:p-5">
-                  <div class="space-y-2 sm:space-y-3">
-                    
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-list text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Sistema de Fila (FILA WCF)</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Gerenciamento de registros com Status = 1</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-sync text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Job de Reprocessamento</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Processamento periódico da fila</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-paper-plane text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Reenvio Automático</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Tentativa de reenviar para ClickHouse</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span class="text-white font-bold text-[10px] sm:text-xs">2</span>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Status 2 - REENVIADO</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Atualização após reenvio bem-sucedido</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-trash text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Remoção da Fila</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Limpeza após processamento</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 sm:space-x-3">
-                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <i class="fa-solid fa-redo text-white text-xs sm:text-sm"></i>
-                      </div>
-                      <div class="flex-1">
-                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Retry Logic</div>
-                        <p class="text-[10px] sm:text-xs text-gray-600">Controle de tentativas e backoff</p>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Próximos Passos -->
-            <div class="mt-4 sm:mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-r-lg p-3 sm:p-4 lg:p-5">
-              <div class="flex items-start space-x-2 sm:space-x-3">
-                <i class="fa-solid fa-rocket text-blue-600 text-lg sm:text-xl lg:text-2xl mt-0.5"></i>
-                <div>
-                  <h4 class="font-semibold text-blue-900 mb-1 sm:mb-2 text-xs sm:text-sm lg:text-base">Próximos Passos</h4>
-                  <ol class="space-y-1 sm:space-y-2 text-[10px] sm:text-xs lg:text-sm text-blue-800">
-                    <li class="flex items-start space-x-2">
-                      <span class="font-bold mt-0.5">1.</span>
-                      <span>Implementar a estrutura da FILA WCF (tabela ou serviço de mensageria)</span>
-                    </li>
-                    <li class="flex items-start space-x-2">
-                      <span class="font-bold mt-0.5">2.</span>
-                      <span>Desenvolver o Job de reprocessamento com agendamento periódico</span>
-                    </li>
-                    <li class="flex items-start space-x-2">
-                      <span class="font-bold mt-0.5">3.</span>
-                      <span>Implementar lógica de retry com backoff exponencial</span>
-                    </li>
-                    <li class="flex items-start space-x-2">
-                      <span class="font-bold mt-0.5">4.</span>
-                      <span>Criar atualização de <span class="code-inline">Status = 2</span> após reenvio bem-sucedido</span>
-                    </li>
-                    <li class="flex items-start space-x-2">
-                      <span class="font-bold mt-0.5">5.</span>
-                      <span>Implementar remoção da fila após processamento</span>
-                    </li>
-                    <li class="flex items-start space-x-2">
-                      <span class="font-bold mt-0.5">6.</span>
-                      <span>Adicionar logging e monitoramento do processo de fila</span>
-                    </li>
-                  </ol>
+                <div class="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-lg p-4 sm:p-5">
+                  <i class="fa-solid fa-rotate text-purple-600 text-xl sm:text-2xl mb-2"></i>
+                  <h3 class="font-semibold text-gray-900 mb-1 text-sm sm:text-base">Auto Recovery</h3>
+                  <p class="text-xs sm:text-sm text-gray-600">Recuperação automática</p>
                 </div>
               </div>
             </div>
-
           </div>
         </section>
 
         <!-- Arquitetura -->
-        <section id="arquitetura" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-24">
-          <div class="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 shadow-sm">
-            <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-6">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+        <section id="arquitetura" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-20 sm:scroll-mt-24">
+          <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div class="flex items-center space-x-3 mb-4 sm:mb-5 lg:mb-6">
+              <div class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-sitemap text-indigo-600 text-base sm:text-lg lg:text-xl"></i>
               </div>
-              <div>
-                <h2 class="text-base sm:text-xl lg:text-2xl font-bold text-gray-900">Arquitetura do Sistema</h2>
-                <p class="text-[10px] sm:text-xs lg:text-sm text-gray-500">Diagrama e fluxo de componentes</p>
+              <div class="min-w-0">
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Arquitetura do Sistema</h2>
+                <p class="text-xs sm:text-sm text-gray-500">Diagrama e fluxo de componentes</p>
               </div>
             </div>
             <div class="mb-6 sm:mb-8">
-              <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-300 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 lg:p-6">
-                <div class="space-y-3 sm:space-y-4">
-                  
-                  <!-- WCF Request -->
+              <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-300 rounded-xl p-4 sm:p-5 lg:p-6 overflow-x-auto">
+                <div class="space-y-3 sm:space-y-4 min-w-[280px]">
                   <div class="flex items-center justify-center">
-                    <div class="bg-white border-2 border-blue-500 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg">
+                    <div class="bg-white border-2 border-blue-500 rounded-lg px-3 sm:px-4 py-2 shadow-lg">
                       <div class="flex items-center space-x-2 sm:space-x-3">
-                        <i class="fa-solid fa-paper-plane text-blue-600 text-base sm:text-xl lg:text-2xl"></i>
-                        <span class="font-bold text-gray-900 text-xs sm:text-sm lg:text-base">WCF Request</span>
+                        <i class="fa-solid fa-paper-plane text-blue-600 text-lg sm:text-xl lg:text-2xl"></i>
+                        <span class="font-bold text-gray-900 text-sm sm:text-base">WCF Request</span>
                       </div>
                     </div>
                   </div>
-                  
                   <div class="flex items-center justify-center">
-                    <i class="fa-solid fa-arrow-down text-gray-400 text-lg sm:text-xl lg:text-2xl"></i>
+                    <i class="fa-solid fa-arrow-down text-gray-400 text-xl sm:text-2xl"></i>
                   </div>
-                  
-                  <!-- Verificação ATIVADO -->
                   <div class="flex items-center justify-center">
-                    <div class="bg-white border-2 border-purple-500 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg">
+                    <div class="bg-white border-2 border-purple-500 rounded-lg px-3 sm:px-4 py-2 shadow-lg">
                       <div class="flex items-center space-x-2 sm:space-x-3">
-                        <i class="fa-solid fa-question-circle text-purple-600 text-base sm:text-xl lg:text-2xl"></i>
-                        <span class="font-bold text-gray-900 text-xs sm:text-sm lg:text-base">ATIVADO = true?</span>
+                        <i class="fa-solid fa-question-circle text-purple-600 text-lg sm:text-xl lg:text-2xl"></i>
+                        <span class="font-bold text-gray-900 text-sm sm:text-base">ATIVADO = true?</span>
                       </div>
                     </div>
                   </div>
-                  
-                  <!-- Bifurcação SIM/NÃO -->
                   <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 lg:gap-8">
-                    
-                    <!-- Caminho SIM -->
                     <div class="flex flex-col items-center space-y-2 sm:space-y-3 w-full sm:w-auto">
-                      <div class="bg-green-100 border-2 border-green-500 rounded-lg px-2.5 py-1 sm:px-3 sm:py-1.5">
-                        <span class="font-semibold text-green-700 text-xs sm:text-sm">SIM</span>
+                      <div class="bg-green-100 border-2 border-green-500 rounded-lg px-3 py-1.5">
+                        <span class="font-semibold text-green-700 text-sm sm:text-base">SIM</span>
                       </div>
-                      <i class="fa-solid fa-arrow-down text-gray-400 text-base sm:text-lg lg:text-xl"></i>
-                      <div class="bg-white border-2 border-green-500 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg text-center">
-                        <i class="fa-solid fa-database text-green-600 text-base sm:text-xl lg:text-2xl mb-0.5 sm:mb-1"></i>
-                        <div class="font-bold text-gray-900 text-xs sm:text-sm">Envia para</div>
-                        <div class="font-bold text-green-600 text-xs sm:text-sm">ClickHouse</div>
+                      <i class="fa-solid fa-arrow-down text-gray-400 text-lg sm:text-xl"></i>
+                      <div class="bg-white border-2 border-green-500 rounded-lg px-3 sm:px-4 py-2 shadow-lg text-center w-full sm:w-auto">
+                        <i class="fa-solid fa-database text-green-600 text-xl sm:text-2xl mb-1"></i>
+                        <div class="font-bold text-gray-900 text-sm sm:text-base">Envia para</div>
+                        <div class="font-bold text-green-600 text-sm sm:text-base">ClickHouse</div>
                       </div>
-                      <div class="flex flex-col sm:flex-row gap-2">
-                        <div class="bg-green-50 border border-green-300 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 text-center">
+                      <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <div class="bg-green-50 border border-green-300 rounded-lg px-2 sm:px-3 py-1.5 text-center">
                           <div class="text-[10px] sm:text-xs text-green-600 font-semibold mb-0.5">SUCESSO</div>
                           <div class="text-[10px] sm:text-xs font-mono text-green-700">HTTP 202</div>
                           <div class="text-[10px] sm:text-xs text-green-600 mt-0.5">Status = 0</div>
                         </div>
-                        <div class="bg-red-50 border border-red-300 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 text-center">
+                        <div class="bg-red-50 border border-red-300 rounded-lg px-2 sm:px-3 py-1.5 text-center">
                           <div class="text-[10px] sm:text-xs text-red-600 font-semibold mb-0.5">ERRO</div>
                           <div class="text-[10px] sm:text-xs font-mono text-red-700">Timeout</div>
                           <div class="text-[10px] sm:text-xs text-red-600 mt-0.5">Status = 1</div>
                         </div>
                       </div>
                     </div>
-                    
-                    <!-- Caminho NÃO -->
                     <div class="flex flex-col items-center space-y-2 sm:space-y-3 w-full sm:w-auto">
-                      <div class="bg-red-100 border-2 border-red-500 rounded-lg px-2.5 py-1 sm:px-3 sm:py-1.5">
-                        <span class="font-semibold text-red-700 text-xs sm:text-sm">NÃO</span>
+                      <div class="bg-red-100 border-2 border-red-500 rounded-lg px-3 py-1.5">
+                        <span class="font-semibold text-red-700 text-sm sm:text-base">NÃO</span>
                       </div>
-                      <i class="fa-solid fa-arrow-down text-gray-400 text-base sm:text-lg lg:text-xl"></i>
-                      <div class="bg-white border-2 border-gray-500 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg text-center">
-                        <i class="fa-solid fa-server text-gray-600 text-base sm:text-xl lg:text-2xl mb-0.5 sm:mb-1"></i>
-                        <div class="font-bold text-gray-900 text-xs sm:text-sm">Mantém no</div>
-                        <div class="font-bold text-gray-600 text-xs sm:text-sm">SQL Server</div>
-                        <div class="text-[10px] sm:text-xs text-gray-500 mt-1">Status = 99</div>
+                      <i class="fa-solid fa-arrow-down text-gray-400 text-lg sm:text-xl"></i>
+                      <div class="bg-white border-2 border-gray-500 rounded-lg px-3 sm:px-4 py-2 shadow-lg text-center w-full sm:w-auto">
+                        <i class="fa-solid fa-server text-gray-600 text-xl sm:text-2xl mb-1"></i>
+                        <div class="font-bold text-gray-900 text-sm sm:text-base">Mantém no</div>
+                        <div class="font-bold text-gray-600 text-sm sm:text-base">SQL Server</div>
+                        <div class="text-xs text-gray-500 mt-1">Status = 99</div>
                       </div>
                     </div>
-                    
                   </div>
-                  
                   <div class="flex items-center justify-center">
-                    <i class="fa-solid fa-arrow-down text-gray-400 text-lg sm:text-xl lg:text-2xl"></i>
+                    <i class="fa-solid fa-arrow-down text-gray-400 text-xl sm:text-2xl"></i>
                   </div>
-                  
-                  <!-- FILA WCF - COM BADGE PENDENTE -->
-                  <div class="flex flex-col items-center justify-center">
-                    <div class="relative">
-                      <div class="bg-white border-2 border-orange-500 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg">
-                        <div class="flex items-center space-x-2 sm:space-x-3">
-                          <i class="fa-solid fa-list text-orange-600 text-base sm:text-xl lg:text-2xl"></i>
-                          <div>
-                            <div class="font-bold text-gray-900 text-xs sm:text-sm">FILA WCF</div>
-                            <div class="text-[10px] sm:text-xs text-gray-500">Apenas Status = 1</div>
-                          </div>
+                  <div class="flex items-center justify-center">
+                    <div class="bg-white border-2 border-orange-500 rounded-lg px-3 sm:px-4 py-2 shadow-lg w-full sm:w-auto">
+                      <div class="flex items-center justify-center sm:justify-start space-x-2 sm:space-x-3">
+                        <i class="fa-solid fa-list text-orange-600 text-lg sm:text-xl lg:text-2xl"></i>
+                        <div class="text-center sm:text-left">
+                          <div class="font-bold text-gray-900 text-sm sm:text-base">FILA WCF</div>
+                          <div class="text-xs text-gray-500">Apenas Status = 1</div>
                         </div>
                       </div>
-                      <span class="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 px-1.5 py-0.5 sm:px-2 sm:py-1 bg-orange-500 text-white text-[9px] sm:text-[10px] font-bold rounded-full animate-pulse">PENDENTE</span>
                     </div>
                   </div>
-                  
                   <div class="flex items-center justify-center">
-                    <i class="fa-solid fa-arrow-down text-gray-400 text-lg sm:text-xl lg:text-2xl"></i>
+                    <i class="fa-solid fa-arrow-down text-gray-400 text-xl sm:text-2xl"></i>
                   </div>
-                  
-                  <!-- Job Reprocessa - COM BADGE PENDENTE -->
-                  <div class="flex flex-col items-center justify-center">
-                    <div class="relative">
-                      <div class="bg-white border-2 border-blue-500 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 shadow-lg">
-                        <div class="flex items-center space-x-2 sm:space-x-3">
-                          <i class="fa-solid fa-sync text-blue-600 text-base sm:text-xl lg:text-2xl"></i>
-                          <div>
-                            <div class="font-bold text-gray-900 text-xs sm:text-sm">Job Reprocessa</div>
-                            <div class="text-[10px] sm:text-xs text-gray-500">Tenta reenviar</div>
-                          </div>
+                  <div class="flex items-center justify-center">
+                    <div class="bg-white border-2 border-blue-500 rounded-lg px-3 sm:px-4 py-2 shadow-lg w-full sm:w-auto">
+                      <div class="flex items-center justify-center sm:justify-start space-x-2 sm:space-x-3">
+                        <i class="fa-solid fa-sync text-blue-600 text-lg sm:text-xl lg:text-2xl"></i>
+                        <div class="text-center sm:text-left">
+                          <div class="font-bold text-gray-900 text-sm sm:text-base">Job Reprocessa</div>
+                          <div class="text-xs text-gray-500">Tenta reenviar</div>
                         </div>
                       </div>
-                      <span class="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 px-1.5 py-0.5 sm:px-2 sm:py-1 bg-orange-500 text-white text-[9px] sm:text-[10px] font-bold rounded-full animate-pulse">PENDENTE</span>
                     </div>
                   </div>
-                  
                   <div class="flex items-center justify-center">
-                    <div class="bg-blue-50 border border-blue-300 rounded-lg px-2.5 py-1 sm:px-3 sm:py-1.5 sm:px-4 sm:py-2">
-                      <div class="text-[10px] sm:text-xs font-mono text-blue-700">HTTP 202 → Status = 2</div>
+                    <div class="bg-blue-50 border border-blue-300 rounded-lg px-3 sm:px-4 py-2">
+                      <div class="text-xs sm:text-sm font-mono text-blue-700 text-center">HTTP 202 → Status = 2</div>
                     </div>
                   </div>
-                  
                 </div>
               </div>
             </div>
-            <div class="bg-amber-50 border-l-4 border-amber-500 rounded-r-lg p-3 sm:p-4 lg:p-5">
-              <div class="flex items-start space-x-2 sm:space-x-3">
-                <i class="fa-solid fa-exclamation-triangle text-amber-600 mt-0.5 text-sm sm:text-base"></i>
+            <div class="bg-amber-50 border-l-4 border-amber-500 rounded-r-lg p-4 sm:p-5">
+              <div class="flex items-start space-x-3">
+                <i class="fa-solid fa-exclamation-triangle text-amber-600 mt-0.5 flex-shrink-0"></i>
                 <div>
-                  <h4 class="font-semibold text-amber-900 mb-1 text-xs sm:text-sm lg:text-base">Regra Crítica</h4>
-                  <p class="text-[10px] sm:text-xs lg:text-sm text-amber-800">A <span class="code-inline">FILA WCF</span> recebe <strong>exclusivamente</strong> registros com <span class="code-inline">ClickStatus = 1</span>. Registros com status 0 ou 99 não entram na fila.</p>
+                  <h4 class="font-semibold text-amber-900 mb-1 text-sm sm:text-base">Regra Crítica</h4>
+                  <p class="text-xs sm:text-sm text-amber-800">A <span class="code-inline">FILA WCF</span> recebe <strong>exclusivamente</strong> registros com <span class="code-inline">ClickStatus = 1</span>. Registros com status 0 ou 99 não entram na fila.</p>
                 </div>
               </div>
             </div>
@@ -534,224 +317,668 @@
         </section>
 
         <!-- Estados -->
-        <section id="estados" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-24">
-          <div class="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 shadow-sm">
-            <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-6">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+        <section id="estados" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-20 sm:scroll-mt-24">
+          <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div class="flex items-center space-x-3 mb-4 sm:mb-5 lg:mb-6">
+              <div class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-toggle-on text-green-600 text-base sm:text-lg lg:text-xl"></i>
               </div>
-              <div>
-                <h2 class="text-base sm:text-xl lg:text-2xl font-bold text-gray-900">Estados do Sistema</h2>
-                <p class="text-[10px] sm:text-xs lg:text-sm text-gray-500">Definição completa dos status ClickStatus</p>
+              <div class="min-w-0">
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Estados do Sistema</h2>
+                <p class="text-xs sm:text-sm text-gray-500">Definição completa dos status ClickStatus</p>
               </div>
             </div>
             <div class="space-y-3 sm:space-y-4">
-              
-              <!-- Status 0 -->
               <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-r-lg p-3 sm:p-4 lg:p-5">
                 <div class="flex items-start space-x-3 sm:space-x-4">
-                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <span class="text-xl sm:text-2xl font-bold text-white font-mono">0</span>
                   </div>
-                  <div class="flex-1">
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                      <h3 class="text-sm sm:text-base lg:text-lg font-bold text-gray-900">ENVIADO</h3>
-                      <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-green-100 text-green-700 text-[10px] sm:text-xs font-semibold rounded-full">Success</span>
-                      <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-green-600 text-white text-[10px] sm:text-xs font-semibold rounded-full">✅ IMPLEMENTADO</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                      <h3 class="text-base sm:text-lg font-bold text-gray-900">ENVIADO</h3>
+                      <span class="px-2 sm:px-3 py-1 bg-green-100 text-green-700 text-[10px] sm:text-xs font-semibold rounded-full">Success</span>
                     </div>
                     <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3">Enviado com sucesso para ClickHouse com resposta <span class="code-inline">HTTP 202</span>.</p>
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                      <div class="flex items-center space-x-1.5 sm:space-x-2">
-                        <i class="fa-solid fa-check-circle text-green-600 text-xs sm:text-sm"></i>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-check-circle text-green-600 flex-shrink-0"></i>
                         <span class="text-gray-600">Não vai para fila</span>
                       </div>
-                      <div class="flex items-center space-x-1.5 sm:space-x-2">
-                        <i class="fa-solid fa-clock text-green-600 text-xs sm:text-sm"></i>
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-clock text-green-600 flex-shrink-0"></i>
                         <span class="text-gray-600">Processamento imediato</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <!-- Status 1 -->
+              
               <div class="bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-red-500 rounded-r-lg p-3 sm:p-4 lg:p-5">
                 <div class="flex items-start space-x-3 sm:space-x-4">
-                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-red-500 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <span class="text-xl sm:text-2xl font-bold text-white font-mono">1</span>
                   </div>
-                  <div class="flex-1">
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                      <h3 class="text-sm sm:text-base lg:text-lg font-bold text-gray-900">ERRO</h3>
-                      <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-red-100 text-red-700 text-[10px] sm:text-xs font-semibold rounded-full">Failed</span>
-                      <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-green-600 text-white text-[10px] sm:text-xs font-semibold rounded-full">✅ IMPLEMENTADO</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                      <h3 class="text-base sm:text-lg font-bold text-gray-900">ERRO</h3>
+                      <span class="px-2 sm:px-3 py-1 bg-red-100 text-red-700 text-[10px] sm:text-xs font-semibold rounded-full">Failed</span>
                     </div>
                     <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3">Falha no envio para ClickHouse. Registro aguardando reenvio automático.</p>
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                      <div class="flex items-center space-x-1.5 sm:space-x-2">
-                        <i class="fa-solid fa-arrow-right text-red-600 text-xs sm:text-sm"></i>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-arrow-right text-red-600 flex-shrink-0"></i>
                         <span class="text-gray-600">Vai para fila WCF</span>
                       </div>
-                      <div class="flex items-center space-x-1.5 sm:space-x-2">
-                        <i class="fa-solid fa-rotate text-red-600 text-xs sm:text-sm"></i>
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-rotate text-red-600 flex-shrink-0"></i>
                         <span class="text-gray-600">Aguarda reprocessamento</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <!-- Status 2 -->
+              
               <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border-l-4 border-blue-500 rounded-r-lg p-3 sm:p-4 lg:p-5">
                 <div class="flex items-start space-x-3 sm:space-x-4">
-                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <span class="text-xl sm:text-2xl font-bold text-white font-mono">2</span>
                   </div>
-                  <div class="flex-1">
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                      <h3 class="text-sm sm:text-base lg:text-lg font-bold text-gray-900">REENVIADO</h3>
-                      <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-100 text-blue-700 text-[10px] sm:text-xs font-semibold rounded-full">Recovered</span>
-                      <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-orange-500 text-white text-[10px] sm:text-xs font-semibold rounded-full animate-pulse">⏳ PENDENTE</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                      <h3 class="text-base sm:text-lg font-bold text-gray-900">REENVIADO</h3>
+                      <span class="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 text-[10px] sm:text-xs font-semibold rounded-full">Recovered</span>
                     </div>
                     <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3">Recuperado da fila e reenviado com sucesso. Resposta <span class="code-inline">HTTP 202</span> recebida.</p>
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                      <div class="flex items-center space-x-1.5 sm:space-x-2">
-                        <i class="fa-solid fa-check-double text-blue-600 text-xs sm:text-sm"></i>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-check-double text-blue-600 flex-shrink-0"></i>
                         <span class="text-gray-600">Processado pela fila</span>
                       </div>
-                      <div class="flex items-center space-x-1.5 sm:space-x-2">
-                        <i class="fa-solid fa-trash text-blue-600 text-xs sm:text-sm"></i>
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-trash text-blue-600 flex-shrink-0"></i>
                         <span class="text-gray-600">Removido da fila</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <!-- Status 99 -->
+              
               <div class="bg-gradient-to-r from-gray-50 to-slate-50 border-l-4 border-gray-500 rounded-r-lg p-3 sm:p-4 lg:p-5">
                 <div class="flex items-start space-x-3 sm:space-x-4">
-                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-500 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <span class="text-xl sm:text-2xl font-bold text-white font-mono">99</span>
                   </div>
-                  <div class="flex-1">
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                      <h3 class="text-sm sm:text-base lg:text-lg font-bold text-gray-900">DESATIVADO</h3>
-                      <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-100 text-gray-700 text-[10px] sm:text-xs font-semibold rounded-full">Disabled</span>
-                      <span class="px-2 py-0.5 sm:px-3 sm:py-1 bg-green-600 text-white text-[10px] sm:text-xs font-semibold rounded-full">✅ IMPLEMENTADO</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                      <h3 class="text-base sm:text-lg font-bold text-gray-900">DESATIVADO</h3>
+                      <span class="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 text-[10px] sm:text-xs font-semibold rounded-full">Disabled</span>
                     </div>
                     <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3">ClickHouse desativado via parâmetro. Dados mantidos no SQL Server.</p>
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                      <div class="flex items-center space-x-1.5 sm:space-x-2">
-                        <i class="fa-solid fa-ban text-gray-600 text-xs sm:text-sm"></i>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-ban text-gray-600 flex-shrink-0"></i>
                         <span class="text-gray-600">Não tenta enviar</span>
                       </div>
-                      <div class="flex items-center space-x-1.5 sm:space-x-2">
-                        <i class="fa-solid fa-database text-gray-600 text-xs sm:text-sm"></i>
+                      <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-database text-gray-600 flex-shrink-0"></i>
                         <span class="text-gray-600">Apenas SQL Server</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
             </div>
-
-            <!-- Resumo de distribuição -->
-            <div class="mt-4 sm:mt-6 bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 lg:p-5">
-              <h3 class="font-semibold text-gray-900 mb-2 sm:mb-3 flex items-center space-x-2 text-xs sm:text-sm lg:text-base">
+            <div class="mt-4 sm:mt-5 lg:mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-5">
+              <h3 class="font-semibold text-gray-900 mb-3 flex items-center space-x-2 text-sm sm:text-base">
                 <i class="fa-solid fa-chart-pie text-gray-600"></i>
                 <span>Distribuição de Estados</span>
               </h3>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-                <div class="text-center p-2 bg-white rounded-lg border border-gray-200">
-                  <div class="text-xl sm:text-2xl font-bold text-green-600 mb-0.5 sm:mb-1">0</div>
-                  <div class="text-[10px] sm:text-xs text-gray-600">Enviado</div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div class="text-center">
+                  <div class="text-xl sm:text-2xl font-bold text-green-600 mb-1">0</div>
+                  <div class="text-xs text-gray-600">Enviado</div>
                 </div>
-                <div class="text-center p-2 bg-white rounded-lg border border-gray-200">
-                  <div class="text-xl sm:text-2xl font-bold text-red-600 mb-0.5 sm:mb-1">1</div>
-                  <div class="text-[10px] sm:text-xs text-gray-600">Erro</div>
+                <div class="text-center">
+                  <div class="text-xl sm:text-2xl font-bold text-red-600 mb-1">1</div>
+                  <div class="text-xs text-gray-600">Erro</div>
                 </div>
-                <div class="text-center p-2 bg-white rounded-lg border border-gray-200">
-                  <div class="text-xl sm:text-2xl font-bold text-blue-600 mb-0.5 sm:mb-1">2</div>
-                  <div class="text-[10px] sm:text-xs text-gray-600">Reenviado</div>
+                <div class="text-center">
+                  <div class="text-xl sm:text-2xl font-bold text-blue-600 mb-1">2</div>
+                  <div class="text-xs text-gray-600">Reenviado</div>
                 </div>
-                <div class="text-center p-2 bg-white rounded-lg border border-gray-200">
-                  <div class="text-xl sm:text-2xl font-bold text-gray-600 mb-0.5 sm:mb-1">99</div>
-                  <div class="text-[10px] sm:text-xs text-gray-600">Desativado</div>
+                <div class="text-center">
+                  <div class="text-xl sm:text-2xl font-bold text-gray-600 mb-1">99</div>
+                  <div class="text-xs text-gray-600">Desativado</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Continua com as outras seções (Fluxos, Componentes, Configuração) -->
-        <!-- Por brevidade, vou incluir apenas versões simplificadas -->
-
         <!-- Fluxos -->
-        <section id="fluxos" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-24">
-          <div class="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 shadow-sm">
-            <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-6">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+        <section id="fluxos" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-20 sm:scroll-mt-24">
+          <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div class="flex items-center space-x-3 mb-4 sm:mb-5 lg:mb-6">
+              <div class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-diagram-project text-purple-600 text-base sm:text-lg lg:text-xl"></i>
               </div>
-              <div>
-                <h2 class="text-base sm:text-xl lg:text-2xl font-bold text-gray-900">Fluxos Detalhados</h2>
-                <p class="text-[10px] sm:text-xs lg:text-sm text-gray-500">Cenários de operação do sistema</p>
+              <div class="min-w-0">
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Fluxos Detalhados</h2>
+                <p class="text-xs sm:text-sm text-gray-500">Cenários de operação do sistema</p>
               </div>
             </div>
-            
             <div class="space-y-3 sm:space-y-4">
-              <!-- Os 3 cenários com melhor responsividade -->
-              <!-- Por brevidade, mostrando estrutura resumida -->
-              <div class="text-xs sm:text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p>💡 <strong>Dica:</strong> Role horizontalmente em telas pequenas para ver todos os detalhes dos fluxos.</p>
+              <!-- Cenário 1 -->
+              <div class="border border-green-200 rounded-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-3 sm:px-4 py-2.5">
+                  <div class="flex items-center space-x-2 sm:space-x-3">
+                    <div class="w-6 h-6 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span class="text-white font-bold text-sm">1</span>
+                    </div>
+                    <div class="min-w-0">
+                      <h3 class="text-xs sm:text-sm font-bold text-white">Cenário 1: ClickHouse Ativado com Sucesso</h3>
+                      <p class="text-[10px] sm:text-xs text-green-100">Fluxo ideal de processamento</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4 bg-green-50">
+                  <div class="space-y-2">
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-arrow-right text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">WCF Request entra no sistema</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Requisição inicial recebida pelo serviço WCF</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-check text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Verifica <span class="code-inline">ATIVADO = true</span></div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Sistema confirma que ClickHouse está habilitado</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-paper-plane text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Tenta enviar para ClickHouse</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Dados são transmitidos para o ClickHouse</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-thumbs-up text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Recebe resposta <span class="code-inline">HTTP 202</span></div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">ClickHouse confirma aceitação dos dados</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-flag-checkered text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Define <span class="code-inline">ClickStatus = 0</span></div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Fim do fluxo - Não vai para fila</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Cenário 2 -->
+              <div class="border border-red-200 rounded-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-red-500 to-rose-600 px-3 sm:px-4 py-2.5">
+                  <div class="flex items-center space-x-2 sm:space-x-3">
+                    <div class="w-6 h-6 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span class="text-white font-bold text-sm">2</span>
+                    </div>
+                    <div class="min-w-0">
+                      <h3 class="text-xs sm:text-sm font-bold text-white">Cenário 2: ClickHouse Ativado com Erro</h3>
+                      <p class="text-[10px] sm:text-xs text-red-100">Fluxo de recuperação automática</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4 bg-red-50">
+                  <div class="space-y-2">
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-arrow-right text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">WCF Request entra no sistema</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Requisição inicial recebida</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-check text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Verifica <span class="code-inline">ATIVADO = true</span></div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">ClickHouse está habilitado</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-paper-plane text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Tenta enviar para ClickHouse</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Tentativa de transmissão</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-xmark text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Ocorre erro de timeout ou conexão</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Falha na comunicação com ClickHouse</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-exclamation text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Define <span class="code-inline">ClickStatus = 1</span></div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Registro marcado como erro</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-list text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Registro vai para FILA WCF</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Enfileirado para reprocessamento</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-sync text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Job processa fila periodicamente</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Sistema tenta reenviar automaticamente</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-paper-plane text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Tenta reenviar</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Nova tentativa de envio</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-check-double text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Recebe <span class="code-inline">HTTP 202</span></div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Reenvio bem-sucedido</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-flag-checkered text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Define <span class="code-inline">ClickStatus = 2</span> e remove da fila</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Recuperação concluída</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Cenário 3 -->
+              <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-500 to-slate-600 px-3 sm:px-4 py-2.5">
+                  <div class="flex items-center space-x-2 sm:space-x-3">
+                    <div class="w-6 h-6 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span class="text-white font-bold text-sm">3</span>
+                    </div>
+                    <div class="min-w-0">
+                      <h3 class="text-xs sm:text-sm font-bold text-white">Cenário 3: ClickHouse Desativado</h3>
+                      <p class="text-[10px] sm:text-xs text-gray-100">Modo de manutenção</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4 bg-gray-50">
+                  <div class="space-y-2">
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-gray-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-arrow-right text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">WCF Request entra no sistema</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Requisição recebida</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-gray-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-ban text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Verifica <span class="code-inline">ATIVADO = false</span></div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">ClickHouse está desabilitado</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-gray-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-database text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Mantém no SQL Server</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Dados armazenados apenas no SQL</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <div class="w-5 h-5 sm:w-6 sm:h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-flag-checkered text-white text-xs"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-gray-900 mb-0.5 text-xs sm:text-sm">Define <span class="code-inline">ClickStatus = 99</span></div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Fim do fluxo - Não vai para fila e não tenta enviar</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- Componentes -->
-        <section id="componentes" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-24">
-          <div class="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 shadow-sm">
-            <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-6">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+        <section id="componentes" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-20 sm:scroll-mt-24">
+          <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div class="flex items-center space-x-3 mb-4 sm:mb-5 lg:mb-6">
+              <div class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-cubes text-orange-600 text-base sm:text-lg lg:text-xl"></i>
               </div>
-              <div>
-                <h2 class="text-base sm:text-xl lg:text-2xl font-bold text-gray-900">Componentes do Sistema</h2>
-                <p class="text-[10px] sm:text-xs lg:text-sm text-gray-500">Detalhamento de cada componente</p>
+              <div class="min-w-0">
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Componentes do Sistema</h2>
+                <p class="text-xs sm:text-sm text-gray-500">Detalhamento de cada componente</p>
               </div>
             </div>
-            
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-              <!-- Cards dos componentes com melhor responsividade -->
-              <div class="text-xs sm:text-sm text-gray-600 bg-orange-50 border border-orange-200 rounded-lg p-3">
-                <p>📦 Todos os componentes foram otimizados para visualização mobile.</p>
+              <div class="border border-blue-200 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-cyan-50">
+                <div class="bg-blue-600 px-3 sm:px-4 py-2.5">
+                  <div class="flex items-center space-x-2 sm:space-x-3">
+                    <i class="fa-solid fa-server text-white text-lg sm:text-xl lg:text-2xl"></i>
+                    <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white">WCF Service</h3>
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4">
+                  <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3 leading-relaxed">Interface de entrada de dados do sistema.</p>
+                  <div class="space-y-2">
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-blue-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Verifica parâmetro ATIVADO</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Controla tentativa de envio</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-blue-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">ATIVADO = true</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Sucesso → Status 0 | Erro → Status 1 + fila</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-blue-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">ATIVADO = false</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Status 99, não tenta enviar</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="border border-green-200 rounded-xl overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50">
+                <div class="bg-green-600 px-3 sm:px-4 py-2.5">
+                  <div class="flex items-center space-x-2 sm:space-x-3">
+                    <i class="fa-solid fa-database text-white text-lg sm:text-xl lg:text-2xl"></i>
+                    <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white">ClickHouse</h3>
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4">
+                  <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3 leading-relaxed">Destino primário para dados analíticos de alta performance.</p>
+                  <div class="space-y-2">
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-green-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Retorna HTTP 202 Accepted</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Quando aceita dados</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-green-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Falhas possíveis</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Timeout, indisponibilidade, erro de rede</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-green-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Recebe tentativas</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Apenas quando ATIVADO = true</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="border border-gray-300 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-slate-50">
+                <div class="bg-gray-600 px-3 sm:px-4 py-2.5">
+                  <div class="flex items-center space-x-2 sm:space-x-3">
+                    <i class="fa-solid fa-server text-white text-lg sm:text-xl lg:text-2xl"></i>
+                    <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white">SQL Server</h3>
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4">
+                  <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3 leading-relaxed">Storage permanente dos dados transacionais.</p>
+                  <div class="space-y-2">
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-gray-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Coluna ClickStatus</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Controle de estado de envio</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-gray-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Estados possíveis</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">0, 1, 2 e 99</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-gray-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Durabilidade garantida</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Todos os dados permanentes</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="border border-orange-200 rounded-xl overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50">
+                <div class="bg-orange-600 px-3 sm:px-4 py-2.5">
+                  <div class="flex items-center space-x-2 sm:space-x-3">
+                    <i class="fa-solid fa-list text-white text-lg sm:text-xl lg:text-2xl"></i>
+                    <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white">Sistema de Fila (FILA WCF)</h3>
+                  </div>
+                </div>
+                <div class="p-3 sm:p-4">
+                  <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3 leading-relaxed">Gerenciamento de reprocessamento automático.</p>
+                  <div class="space-y-2">
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-orange-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Recebe apenas Status = 1</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Não recebe 0 ou 99</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-orange-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Job processa periodicamente</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Tenta reenviar para ClickHouse</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start space-x-2 sm:space-x-3">
+                      <i class="fa-solid fa-check text-orange-600 mt-1 flex-shrink-0 text-xs sm:text-sm"></i>
+                      <div>
+                        <div class="font-semibold text-gray-900 text-xs sm:text-sm">Remove ao reenviar</div>
+                        <p class="text-[10px] sm:text-xs text-gray-600">Atualiza para Status = 2</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 sm:mt-5 lg:mt-6 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4 sm:p-5">
+              <div class="flex items-start space-x-3 sm:space-x-4">
+                <i class="fa-solid fa-lightbulb text-purple-600 text-xl sm:text-2xl flex-shrink-0"></i>
+                <div>
+                  <h4 class="font-semibold text-purple-900 mb-2 text-sm sm:text-base">Integração Inteligente</h4>
+                  <p class="text-xs sm:text-sm lg:text-base text-purple-800 leading-relaxed">Os componentes trabalham em conjunto para garantir que nenhum dado seja perdido. O WCF Service atua como ponto de entrada, o ClickHouse oferece performance analítica, o SQL Server garante persistência, e a FILA WCF proporciona resiliência através de reprocessamento automático.</p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- Configuração -->
-        <section id="configuracao" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-24">
-          <div class="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 shadow-sm">
-            <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-6">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
+        <section id="configuracao" class="mb-6 sm:mb-8 lg:mb-12 scroll-mt-20 sm:scroll-mt-24">
+          <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div class="flex items-center space-x-3 mb-4 sm:mb-5 lg:mb-6">
+              <div class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-sliders text-cyan-600 text-base sm:text-lg lg:text-xl"></i>
               </div>
-              <div>
-                <h2 class="text-base sm:text-xl lg:text-2xl font-bold text-gray-900">Parâmetros de Configuração</h2>
-                <p class="text-[10px] sm:text-xs lg:text-sm text-gray-500">Configurações críticas do sistema</p>
+              <div class="min-w-0">
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Parâmetros de Configuração</h2>
+                <p class="text-xs sm:text-sm text-gray-500">Configurações críticas do sistema</p>
               </div>
             </div>
-            
-            <div class="text-xs sm:text-sm text-gray-600 bg-cyan-50 border border-cyan-200 rounded-lg p-3">
-              <p>⚙️ Configurações responsivas para todas as resoluções.</p>
+            <div class="space-y-3 sm:space-y-4">
+              <div class="border border-indigo-200 rounded-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-3 sm:px-4 py-2.5">
+                  <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-toggle-on"></i>
+                    <span>Parâmetro ClickHouse.ATIVADO</span>
+                  </h3>
+                </div>
+                <div class="p-3 sm:p-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div class="bg-green-50 border-l-4 border-green-500 rounded-r-lg p-3 sm:p-4">
+                      <div class="flex items-center space-x-2 sm:space-x-3 mb-2">
+                        <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-check text-white text-xs"></i>
+                        </div>
+                        <div>
+                          <div class="font-bold text-gray-900 text-xs sm:text-sm">ATIVADO = true</div>
+                          <div class="text-[10px] sm:text-xs text-gray-500">ClickHouse operacional</div>
+                        </div>
+                      </div>
+                      <ul class="space-y-1 text-[10px] sm:text-xs">
+                        <li class="flex items-start space-x-2">
+                          <i class="fa-solid fa-circle text-green-600 text-[8px] mt-1 flex-shrink-0"></i>
+                          <span class="text-gray-700">Sistema tenta enviar para ClickHouse</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                          <i class="fa-solid fa-circle text-green-600 text-[8px] mt-1 flex-shrink-0"></i>
+                          <span class="text-gray-700">Sucesso: <span class="code-inline">ClickStatus = 0</span></span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                          <i class="fa-solid fa-circle text-green-600 text-[8px] mt-1 flex-shrink-0"></i>
+                          <span class="text-gray-700">Erro: <span class="code-inline">ClickStatus = 1</span> + fila</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div class="bg-gray-50 border-l-4 border-gray-500 rounded-r-lg p-3 sm:p-4">
+                      <div class="flex items-center space-x-2 sm:space-x-3 mb-2">
+                        <div class="w-5 h-5 sm:w-6 sm:h-6 bg-gray-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <i class="fa-solid fa-ban text-white text-xs"></i>
+                        </div>
+                        <div>
+                          <div class="font-bold text-gray-900 text-xs sm:text-sm">ATIVADO = false</div>
+                          <div class="text-[10px] sm:text-xs text-gray-500">ClickHouse inativo</div>
+                        </div>
+                      </div>
+                      <ul class="space-y-1 text-[10px] sm:text-xs">
+                        <li class="flex items-start space-x-2">
+                          <i class="fa-solid fa-circle text-gray-600 text-[8px] mt-1 flex-shrink-0"></i>
+                          <span class="text-gray-700">Sistema não tenta enviar</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                          <i class="fa-solid fa-circle text-gray-600 text-[8px] mt-1 flex-shrink-0"></i>
+                          <span class="text-gray-700">Define: <span class="code-inline">ClickStatus = 99</span></span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                          <i class="fa-solid fa-circle text-gray-600 text-[8px] mt-1 flex-shrink-0"></i>
+                          <span class="text-gray-700">Mantém no SQL, não vai para fila</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="border border-purple-200 rounded-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-600 px-3 sm:px-4 py-2.5">
+                  <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-code"></i>
+                    <span>Código de Resposta HTTP</span>
+                  </h3>
+                </div>
+                <div class="p-3 sm:p-4">
+                  <div class="flex flex-col sm:flex-row items-start space-y-3 sm:space-y-0 sm:space-x-4">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg mx-auto sm:mx-0">
+                      <span class="text-xl sm:text-2xl font-bold text-white font-mono">202</span>
+                    </div>
+                    <div class="flex-1 w-full">
+                      <h4 class="text-base sm:text-lg font-bold text-gray-900 mb-2 text-center sm:text-left">HTTP 202 Accepted</h4>
+                      <p class="text-xs sm:text-sm lg:text-base text-gray-700 mb-2 sm:mb-3 leading-relaxed">Retornado pelo ClickHouse após receber dados. Indica que a requisição foi aceita para processamento assíncrono.</p>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-2.5 sm:p-3">
+                          <div class="flex items-center space-x-2 mb-1">
+                            <i class="fa-solid fa-check-circle text-green-600 text-sm flex-shrink-0"></i>
+                            <span class="font-semibold text-gray-900 text-xs sm:text-sm">Indica</span>
+                          </div>
+                          <p class="text-[10px] sm:text-xs text-gray-600">Requisição aceita para processamento assíncrono</p>
+                        </div>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5 sm:p-3">
+                          <div class="flex items-center space-x-2 mb-1">
+                            <i class="fa-solid fa-exclamation-circle text-yellow-600 text-sm flex-shrink-0"></i>
+                            <span class="font-semibold text-gray-900 text-xs sm:text-sm">Não Garante</span>
+                          </div>
+                          <p class="text-[10px] sm:text-xs text-gray-600">Processamento imediato, apenas aceitação</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
-
       </div>
     </main>
 
@@ -761,51 +988,64 @@
       const sidebar = document.getElementById('sidebar');
       const mobileOverlay = document.getElementById('mobile-overlay');
       const navLinks = document.querySelectorAll('.mobile-nav-link');
+      const body = document.body;
 
-      mobileMenuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('-translate-x-full');
-        mobileOverlay.classList.toggle('hidden');
-      });
+      function openMenu() {
+        sidebar.classList.remove('-translate-x-full');
+        mobileOverlay.classList.remove('hidden');
+        body.classList.add('menu-open');
+      }
 
-      mobileOverlay.addEventListener('click', () => {
+      function closeMenu() {
         sidebar.classList.add('-translate-x-full');
         mobileOverlay.classList.add('hidden');
+        body.classList.remove('menu-open');
+      }
+
+      mobileMenuBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('-translate-x-full')) {
+          openMenu();
+        } else {
+          closeMenu();
+        }
       });
+
+      mobileOverlay.addEventListener('click', closeMenu);
 
       navLinks.forEach(link => {
         link.addEventListener('click', () => {
           if (window.innerWidth < 1024) {
-            sidebar.classList.add('-translate-x-full');
-            mobileOverlay.classList.add('hidden');
+            closeMenu();
           }
         });
       });
 
-      // Smooth scroll with offset for mobile header
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) {
+          closeMenu();
+        }
+      });
+
+      // Smooth scroll with offset for mobile
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
           e.preventDefault();
           const target = document.querySelector(this.getAttribute('href'));
           if (target) {
-            const isMobile = window.innerWidth < 1024;
-            const offsetTop = target.offsetTop - (isMobile ? 60 : 80);
-            window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+            const headerHeight = document.getElementById('header').offsetHeight;
+            const offsetTop = target.offsetTop - headerHeight - 10;
+            window.scrollTo({ 
+              top: offsetTop, 
+              behavior: 'smooth' 
+            });
           }
         });
       });
 
-      // Search functionality (basic)
-      const searchInput = document.getElementById('search-input');
-      searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        navLinks.forEach(link => {
-          const text = link.textContent.toLowerCase();
-          if (text.includes(searchTerm)) {
-            link.style.display = 'flex';
-          } else {
-            link.style.display = searchTerm === '' ? 'flex' : 'none';
-          }
-        });
+      // Prevent layout shift on page load
+      window.addEventListener('load', () => {
+        document.body.style.visibility = 'visible';
       });
     </script>
 </body>
